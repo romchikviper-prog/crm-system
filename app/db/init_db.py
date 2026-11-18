@@ -2,6 +2,7 @@ import logging
 
 from app.db.base import Base
 from app.db.session import engine
+from app.modules import customers  # noqa: F401  (реєстрація ORM-моделей)
 
 logger = logging.getLogger(__name__)
 
