@@ -1,0 +1,421 @@
+{
+  "info": {
+    "_postman_id": "c7a1f2e4-5b6d-4a8e-9c01-5a7b3d2e1f40",
+    "name": "CRM System — тести якості API",
+    "description": "Автоматизовані тести якості REST API CRM System: перевірка стану сервісу, контрактів клієнтів, валідації, обробки помилок, заголовків трасування та часу відповіді.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01. Перевірка стану сервісу",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Відповідь у форматі JSON', function () {",
+              "    pm.response.to.be.json;",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('Сервіс працює', function () {",
+              "    pm.expect(body.status).to.eql('ok');",
+              "});",
+              "pm.test('База даних доступна', function () {",
+              "    pm.expect(body.database).to.eql('ok');",
+              "});",
+              "pm.test('Назва сервісу CRM System', function () {",
+              "    pm.expect(body.service).to.eql('CRM System');",
+              "});",
+              "pm.test('Є заголовок X-Request-ID', function () {",
+              "    pm.expect(pm.response.headers.has('X-Request-ID')).to.be.true;",
+              "});",
+              "pm.test('Час відповіді менше 1000 мс', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/health",
+        "description": "Перевіряє доступність API та з’єднання з базою даних."
+      },
+      "response": []
+    },
+    {
+      "name": "02. Створення клієнта",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "var stamp = Date.now();",
+              "var rnd = Math.floor(Math.random() * 1000000);",
+              "pm.collectionVariables.set('qaEmail', 'qa+' + stamp + rnd + '@example.com');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 201 Created', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test('Відповідь у форматі JSON', function () {",
+              "    pm.response.to.be.json;",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('Повернуто ідентифікатор клієнта', function () {",
+              "    pm.expect(body.id).to.be.a('number');",
+              "});",
+              "pm.test('Статус клієнта active', function () {",
+              "    pm.expect(body.status).to.eql('active');",
+              "});",
+              "pm.test('Електронна пошта збережена', function () {",
+              "    pm.expect(body.email).to.eql(pm.collectionVariables.get('qaEmail'));",
+              "});",
+              "pm.test('Є заголовок X-Request-ID', function () {",
+              "    pm.expect(pm.response.headers.has('X-Request-ID')).to.be.true;",
+              "});",
+              "pm.test('Час відповіді менше 1000 мс', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+              "});",
+              "pm.collectionVariables.set('customerId', body.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"full_name\": \"Олена Коваленко\",\n  \"email\": \"{{qaEmail}}\",\n  \"phone\": \"+380671234567\",\n  \"company\": \"ТОВ «Вектор»\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/v1/customers",
+        "description": "Створює клієнта з валідними даними та зберігає його ідентифікатор для наступних запитів."
+      },
+      "response": []
+    },
+    {
+      "name": "03. Отримання клієнта за ідентифікатором",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('Ідентифікатор збігається', function () {",
+              "    pm.expect(String(body.id)).to.eql(String(pm.collectionVariables.get('customerId')));",
+              "});",
+              "pm.test('ПІБ клієнта збережено', function () {",
+              "    pm.expect(body.full_name).to.eql('Олена Коваленко');",
+              "});",
+              "pm.test('Є обов’язкові поля', function () {",
+              "    pm.expect(body).to.have.all.keys('id', 'full_name', 'email', 'phone', 'company', 'status', 'created_at');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/customers/{{customerId}}",
+        "description": "Перевіряє контракт відповіді для створеного клієнта."
+      },
+      "response": []
+    },
+    {
+      "name": "04. Перелік клієнтів",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('Відповідь є масивом', function () {",
+              "    pm.expect(body).to.be.an('array');",
+              "});",
+              "pm.test('Масив не порожній', function () {",
+              "    pm.expect(body.length).to.be.above(0);",
+              "});",
+              "pm.test('Перелік містить створеного клієнта', function () {",
+              "    var id = Number(pm.collectionVariables.get('customerId'));",
+              "    pm.expect(body.some(function (item) { return item.id === id; })).to.be.true;",
+              "});",
+              "pm.test('Час відповіді менше 1000 мс', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/customers",
+        "description": "Перевіряє формування переліку клієнтів."
+      },
+      "response": []
+    },
+    {
+      "name": "05. Дублювання електронної пошти",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 409 Conflict', function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "var error = pm.response.json().error;",
+              "pm.test('Код помилки conflict', function () {",
+              "    pm.expect(error.code).to.eql('conflict');",
+              "});",
+              "pm.test('Повідомлення про конфлікт не порожнє', function () {",
+              "    pm.expect(error.message).to.be.a('string').and.not.empty;",
+              "});",
+              "pm.test('Помилка містить request_id', function () {",
+              "    pm.expect(error.request_id).to.be.a('string').and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"full_name\": \"Олена Коваленко\",\n  \"email\": \"{{qaEmail}}\",\n  \"phone\": \"+380671234567\",\n  \"company\": \"ТОВ «Вектор»\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/v1/customers",
+        "description": "Перевіряє обробку конфлікту за унікальною електронною поштою."
+      },
+      "response": []
+    },
+    {
+      "name": "06. Неіснуючий клієнт",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 404 Not Found', function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "var error = pm.response.json().error;",
+              "pm.test('Код помилки not_found', function () {",
+              "    pm.expect(error.code).to.eql('not_found');",
+              "});",
+              "pm.test('Помилка містить request_id', function () {",
+              "    pm.expect(error.request_id).to.be.a('string').and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/customers/999999",
+        "description": "Перевіряє однакову структуру відповіді для відсутнього ресурсу."
+      },
+      "response": []
+    },
+    {
+      "name": "07. Некоректні дані клієнта",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 422 Unprocessable Entity', function () {",
+              "    pm.response.to.have.status(422);",
+              "});",
+              "var error = pm.response.json().error;",
+              "pm.test('Код помилки validation_error', function () {",
+              "    pm.expect(error.code).to.eql('validation_error');",
+              "});",
+              "pm.test('Є перелік помилок валідації', function () {",
+              "    pm.expect(error.details).to.be.an('array').and.not.empty;",
+              "});",
+              "pm.test('Вказано поле email', function () {",
+              "    pm.expect(error.details.some(function (item) { return item.field === 'email'; })).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"full_name\": \"І\",\n  \"email\": \"not-an-email\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/v1/customers",
+        "description": "Перевіряє валідацію вхідних даних і структуру деталей помилки."
+      },
+      "response": []
+    },
+    {
+      "name": "08. Некоректний ідентифікатор у шляху",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 422 Unprocessable Entity', function () {",
+              "    pm.response.to.have.status(422);",
+              "});",
+              "var error = pm.response.json().error;",
+              "pm.test('Код помилки validation_error', function () {",
+              "    pm.expect(error.code).to.eql('validation_error');",
+              "});",
+              "pm.test('Вказано поле customer_id', function () {",
+              "    pm.expect(error.details.some(function (item) { return item.field === 'customer_id'; })).to.be.true;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/customers/abc",
+        "description": "Перевіряє обробку некоректного типу параметра шляху."
+      },
+      "response": []
+    },
+    {
+      "name": "09. Кореневий маршрут",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('Повернуто назву сервісу', function () {",
+              "    pm.expect(body.service).to.eql('CRM System');",
+              "});",
+              "pm.test('Вказано шлях до документації', function () {",
+              "    pm.expect(body.docs).to.eql('/docs');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/",
+        "description": "Перевіряє інформаційний маршрут сервісу."
+      },
+      "response": []
+    },
+    {
+      "name": "10. Схема OpenAPI",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Статус 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "var body = pm.response.json();",
+              "pm.test('Назва API CRM System', function () {",
+              "    pm.expect(body.info.title).to.eql('CRM System');",
+              "});",
+              "pm.test('Описано маршрут клієнтів', function () {",
+              "    pm.expect(body.paths).to.have.property('/api/v1/customers');",
+              "});",
+              "pm.test('Описано маршрут перевірки стану', function () {",
+              "    pm.expect(body.paths).to.have.property('/api/v1/health');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/openapi.json",
+        "description": "Перевіряє доступність і повноту автоматичної OpenAPI-документації."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000"
+    },
+    {
+      "key": "customerId",
+      "value": ""
+    },
+    {
+      "key": "qaEmail",
+      "value": ""
+    }
+  ]
+}
