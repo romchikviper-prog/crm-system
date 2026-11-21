@@ -1,5 +1,7 @@
 # CRM System
 
+[![CI](https://github.com/romchikviper-prog/crm-system/actions/workflows/ci.yml/badge.svg)](https://github.com/romchikviper-prog/crm-system/actions/workflows/ci.yml)
+
 CRM-система для автоматизації роботи з клієнтами та контролю замовлень.
 
 ## Про проєкт
@@ -106,8 +108,39 @@ curl -X POST http://localhost:8000/api/v1/customers \
 
 ```bash
 ruff check .
-pytest
+ruff format --check .
+pytest --cov=app --cov-report=term-missing
 ```
+
+## Автоматизовані тести API
+
+Функціональні та регресійні тести API виконуються колекцією Postman через
+Newman. Для запуску API має бути доступним на `http://127.0.0.1:8000`.
+
+```bash
+newman run postman/CRM-System.postman_collection.json \
+  -e postman/CRM-System.postman_environment.json \
+  -n 10 -r cli,json,htmlextra
+```
+
+Детальніше — у [postman/README.md](postman/README.md).
+
+## Безперервна інтеграція та розгортання
+
+Кожен push і pull request до гілок `main` та `develop` автоматично перевіряється
+в GitHub Actions. Пайплайн складається з таких етапів:
+
+| Етап | Що виконується |
+|---|---|
+| Якість коду | `ruff check .`, `ruff format --check .` |
+| Тести | `pytest` із покриттям, поріг 80% |
+| Інтеграція | API на PostgreSQL 16, перевірка стану та колекція Newman |
+| Збірка | `docker build` образу застосунку |
+| Публікація | Docker-образ у GitHub Container Registry за тегом `v*` |
+
+Конфігурація — [.github/workflows/ci.yml](.github/workflows/ci.yml) і
+[.github/workflows/cd.yml](.github/workflows/cd.yml). Повний опис процесів —
+у [docs/ci-cd.md](docs/ci-cd.md).
 
 ## Робота з гілками
 

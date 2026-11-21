@@ -28,3 +28,4 @@ Thumbs.db
 # Local databases
 *.sqlite3
 test.db
+qa.db
