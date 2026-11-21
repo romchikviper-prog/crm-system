@@ -1,6 +1,7 @@
 # CRM System
 
 [![CI](https://github.com/romchikviper-prog/crm-system/actions/workflows/ci.yml/badge.svg)](https://github.com/romchikviper-prog/crm-system/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/romchikviper-prog/crm-system?label=release)](https://github.com/romchikviper-prog/crm-system/releases)
 
 CRM-система для автоматизації роботи з клієнтами та контролю замовлень.
 
@@ -10,9 +11,30 @@ CRM-система для автоматизації роботи з клієн�
 статусів, роботи з каталогом товарів, формування аналітики та надсилання
 повідомлень клієнтам.
 
-Проєкт розвивається поетапно. У лабораторній роботі №3 створено репозиторій,
-налаштовано середовище розробки, закладено базову структуру та реалізовано
-перший модуль — облік клієнтів.
+Поточний реліз — **1.0.0**. Він охоплює реалізований обсяг: REST API обліку
+клієнтів, службові маршрути, централізовану обробку помилок, логування,
+автоматичні тести, CI/CD і Docker-образ. Повний MVP CRM (модулі `auth`,
+`products`, `orders`, `analytics`, `notifications`) ще не завершений; відкриті
+завдання відстежуються в GitHub Issues.
+
+## Реліз 1.0.0
+
+| Артефакт | Розташування |
+|---|---|
+| GitHub Release | https://github.com/romchikviper-prog/crm-system/releases/tag/v1.0.0 |
+| Docker-образ | `ghcr.io/romchikviper-prog/crm-system:1.0.0` |
+| Журнал змін | [CHANGELOG.md](CHANGELOG.md) |
+| Інструкція з розгортання | [docs/deployment.md](docs/deployment.md) |
+| План підтримки | [docs/support.md](docs/support.md) |
+
+Завантаження опублікованого образу:
+
+```bash
+docker pull ghcr.io/romchikviper-prog/crm-system:1.0.0
+```
+
+Повна послідовність розгортання, оновлення та відкату наведена в
+[docs/deployment.md](docs/deployment.md).
 
 ## Технології
 
@@ -22,9 +44,10 @@ CRM-система для автоматизації роботи з клієн�
 | Вебфреймворк | FastAPI |
 | ORM | SQLAlchemy 2.0 |
 | База даних | PostgreSQL 16 |
-| Контейнеризація | Docker Compose |
-| Тести | pytest |
+| Контейнеризація | Docker, Docker Compose |
+| Тести | pytest, Postman/Newman |
 | Лінтер | Ruff |
+| CI/CD | GitHub Actions, GitHub Container Registry |
 
 ## Структура проєкту
 
@@ -35,13 +58,14 @@ crm-system/
 │   ├── core/             # конфігурація, логування, обробка помилок
 │   ├── db/               # підключення до бази даних
 │   └── modules/          # бізнес-модулі системи
-│       ├── auth/
-│       ├── customers/    # реалізований модуль
-│       ├── orders/
-│       ├── products/
-│       ├── analytics/
-│       └── notifications/
-├── docs/                 # проєктна документація
+│       ├── auth/         # заплановано
+│       ├── customers/    # реалізовано
+│       ├── orders/       # заплановано
+│       ├── products/     # заплановано
+│       ├── analytics/    # заплановано
+│       └── notifications/ # заплановано
+├── docs/                 # проєктна та супровідна документація
+├── postman/              # колекція та середовище Newman
 ├── tests/                # тести
 ├── docker-compose.yml
 ├── Dockerfile
@@ -55,6 +79,7 @@ crm-system/
 ```bash
 git clone https://github.com/romchikviper-prog/crm-system.git
 cd crm-system
+git checkout v1.0.0
 ```
 
 ### 2. Налаштування змінних середовища
@@ -73,7 +98,7 @@ docker compose up -d db
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate
+source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 ```
 
@@ -85,6 +110,12 @@ uvicorn app.main:app --reload
 
 Сервіс доступний за адресою http://localhost:8000, інтерактивна документація —
 http://localhost:8000/docs.
+
+Повний стек у контейнерах запускається командою:
+
+```bash
+docker compose up -d --build
+```
 
 ## API
 
@@ -109,7 +140,7 @@ curl -X POST http://localhost:8000/api/v1/customers \
 ```bash
 ruff check .
 ruff format --check .
-pytest --cov=app --cov-report=term-missing
+pytest --cov=app --cov-report=term-missing --cov-fail-under=80
 ```
 
 ## Автоматизовані тести API
@@ -142,11 +173,32 @@ newman run postman/CRM-System.postman_collection.json \
 [.github/workflows/cd.yml](.github/workflows/cd.yml). Повний опис процесів —
 у [docs/ci-cd.md](docs/ci-cd.md).
 
+## Підтримка та оновлення
+
+- Зворотний зв’язок збирається через GitHub Issues (помилки, покращення,
+  питання).
+- Версіонування — Semantic Versioning; зміни фіксуються в
+  [CHANGELOG.md](CHANGELOG.md).
+- Порядок виправлення дефектів, строки реакції, регресійне тестування та
+  чек-лист релізу описані в [docs/support.md](docs/support.md).
+- Базовий моніторинг — журнали API з `X-Request-ID`, маршрут
+  `/api/v1/health` і статус GitHub Actions.
+
+## Обмеження релізу 1.0.0
+
+- Реалізовано лише модуль `customers`; інші бізнес-модулі заплановані.
+- Відсутні автентифікація й авторизація, тому API не можна відкривати в
+  інтернет без зворотного проксі, VPN або іншого захисту.
+- Перелік клієнтів повертається без пагінації; `PATCH` і `DELETE` не
+  реалізовані.
+- Схема бази створюється через `create_all`; міграції Alembic заплановані.
+
 ## Робота з гілками
 
 - `main` — стабільна версія;
 - `develop` — інтеграційна гілка;
-- `feature/*` — окремі функціональні зміни.
+- `feature/*` — окремі функціональні зміни;
+- `release/*` — підготовка релізу.
 
 Правила комітів і pull request описано в [CONTRIBUTING.md](CONTRIBUTING.md).
 
