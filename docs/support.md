@@ -110,7 +110,7 @@
    `app/core/config.py` і README.
 4. CI на `main` зелений.
 5. Створено тег `vX.Y.Z` і GitHub Release.
-6. CD опублікував образ із тегами `X.Y.Z`, `latest`, `sha-<commit>`.
+6. CD опублікував образ із тегами `vX.Y.Z`, `latest`, `sha-<commit>`.
 7. Перевірено `/api/v1/health` на розгорнутому образі.
 8. Оновлено документацію та посилання на реліз.
 

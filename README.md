@@ -22,7 +22,7 @@ CRM-система для автоматизації роботи з клієн�
 | Артефакт | Розташування |
 |---|---|
 | GitHub Release | https://github.com/romchikviper-prog/crm-system/releases/tag/v1.0.0 |
-| Docker-образ | `ghcr.io/romchikviper-prog/crm-system:1.0.0` |
+| Docker-образ | `ghcr.io/romchikviper-prog/crm-system:v1.0.0` |
 | Журнал змін | [CHANGELOG.md](CHANGELOG.md) |
 | Інструкція з розгортання | [docs/deployment.md](docs/deployment.md) |
 | План підтримки | [docs/support.md](docs/support.md) |
@@ -30,7 +30,7 @@ CRM-система для автоматизації роботи з клієн�
 Завантаження опублікованого образу:
 
 ```bash
-docker pull ghcr.io/romchikviper-prog/crm-system:1.0.0
+docker pull ghcr.io/romchikviper-prog/crm-system:v1.0.0
 ```
 
 Повна послідовність розгортання, оновлення та відкату наведена в

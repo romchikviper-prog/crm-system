@@ -9,7 +9,7 @@
 | Артефакт | Розташування |
 |---|---|
 | Вихідний код | GitHub, тег `v1.0.0` |
-| Docker-образ | `ghcr.io/romchikviper-prog/crm-system:1.0.0` |
+| Docker-образ | `ghcr.io/romchikviper-prog/crm-system:v1.0.0` |
 | Журнал змін | `CHANGELOG.md` |
 | API-документація | `http://<host>:8000/docs`, `http://<host>:8000/openapi.json` |
 | План підтримки | `docs/support.md` |
@@ -82,7 +82,7 @@ docker run -d --name crm-api --network crm-net --restart unless-stopped \
   -e DATABASE_URL='postgresql+psycopg://crm:<password>@crm-db:5432/crm' \
   -e ENVIRONMENT=production \
   -e LOG_LEVEL=INFO \
-  ghcr.io/romchikviper-prog/crm-system:1.0.0
+  ghcr.io/romchikviper-prog/crm-system:v1.0.0
 ```
 
 Якщо пароль містить символи `@`, `:`, `/` або `#`, його потрібно
@@ -175,7 +175,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 2. Завантажте новий образ:
 
    ```bash
-   docker pull ghcr.io/romchikviper-prog/crm-system:1.0.1
+   docker pull ghcr.io/romchikviper-prog/crm-system:v1.0.1
    ```
 
 3. Зупиніть і видаліть контейнер API, не видаляючи том даних:
@@ -230,7 +230,7 @@ cat crm_backup_2026-11-21.sql | docker exec -i crm-db psql -U crm -d crm
 | `/api/v1/health` повертає `database: error` | доступність PostgreSQL, пароль, назву бази |
 | Порт `8000` зайнятий | змініть публікацію порту або зупиніть інший процес |
 | Помилка 500 | знайдіть `request_id` у відповіді та в журналі API |
-| Образ не завантажується | перевірте доступ до `ghcr.io` і тег `1.0.0` |
+| Образ не завантажується | перевірте доступ до `ghcr.io` і тег `v1.0.0` |
 
 Для звернення до підтримки зберіть версію, середовище, кроки відтворення,
 очікуваний і фактичний результат, логи та `request_id`. Порядок описано в
