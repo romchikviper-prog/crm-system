@@ -106,8 +106,22 @@ curl -X POST http://localhost:8000/api/v1/customers \
 
 ```bash
 ruff check .
-pytest
+ruff format --check .
+pytest --cov=app --cov-report=term-missing
 ```
+
+## Автоматизовані тести API
+
+Функціональні та регресійні тести API виконуються колекцією Postman через
+Newman. Для запуску API має бути доступним на `http://127.0.0.1:8000`.
+
+```bash
+newman run postman/CRM-System.postman_collection.json \
+  -e postman/CRM-System.postman_environment.json \
+  -n 10 -r cli,json,htmlextra
+```
+
+Детальніше — у [postman/README.md](postman/README.md).
 
 ## Робота з гілками
 
