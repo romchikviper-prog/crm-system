@@ -106,8 +106,19 @@ newman run postman/CRM-System.postman_collection.json \
 | Запуск | Подія | Статус | Тривалість |
 |---|---|---|---|
 | CI №1 (pull request #14) | `pull_request` | успішно | 1 хв 07 с |
-| CI №2 (develop після злиття) | `push` | успішно | — |
-| CD №1 (ручний запуск) | `workflow_dispatch` | успішно | — |
+| CI №2 (pull request #14, документація) | `pull_request` | успішно | 1 хв 16 с |
+| CI №3 (develop після злиття) | `push` | успішно | 1 хв 10 с |
+| CI №4 (main після злиття) | `push` | успішно | 1 хв 11 с |
+| CD №1 (ручний запуск) | `workflow_dispatch` | успішно | 49 с |
+
+У кожному запуску CI: Ruff — 0 порушень, pytest — 8 із 8 тестів, покриття
+97%; інтеграційний етап — 3 ітерації Newman, 30 запитів, 132 assertions,
+0 помилок. Розмір зібраного Docker-образу — 69 570 638 байт (69,57 МБ).
+
+CD опублікував образ із тегами `latest` і `sha-ae6e07a`. Дайджест маніфесту —
+`sha256:0bf2e8d83ef401bde2fe61721116a8db7fc4f59a727164da706c77e5cb39cae1`.
+Образ доступний у
+[GitHub Container Registry](https://github.com/romchikviper-prog/crm-system/pkgs/container/crm-system).
 
 ## Обмеження
 
